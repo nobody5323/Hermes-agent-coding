@@ -83,6 +83,8 @@ class GeneratedPatch(BaseModel):
     strategy: str = ""
     target_file: str | None = None
     reason: str = ""
+    model: str | None = None
+    used_fallback: bool = False
     errors: list[str] = Field(default_factory=list)
 
 

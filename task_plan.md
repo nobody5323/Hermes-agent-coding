@@ -18,6 +18,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 9 | complete | Add Hermes project-local plugin skeleton |
 | 10 | complete | Add deployment and demo documentation |
 | 11 | complete | Add rule-based automatic Patch Generator for MVP demo |
+| 12 | complete | Add LLM-based Patch Generator with rule fallback |
 
 ## Key Decisions
 
@@ -31,6 +32,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - Hermes project plugins live under `.hermes/plugins/` and require `HERMES_ENABLE_PROJECT_PLUGINS=true`.
 - The real Hermes integration has been verified on the server with DeepSeek and `ai_coding_run_minimum_loop`.
 - Automatic patch generation starts as a conservative rule-based generator for the demo bugfix, not a general LLM patcher.
+- LLM patch generation should use an OpenAI-compatible Chat Completions API and keep the rule generator as fallback.
 
 ## Errors Encountered
 

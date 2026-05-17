@@ -209,6 +209,17 @@ Sandbox: exit=0, command succeeded
 
 The MVP includes a conservative rule-based Patch Generator for the empty-password bugfix demo. This allows the minimum loop to run without manually passing `examples/bugfix_empty_password.diff`.
 
+The current implementation also includes an OpenAI-compatible LLM Patch Generator. In `auto` mode the system tries LLM generation first when credentials exist, then falls back to the rule generator if no key is configured or the LLM call fails.
+
+LLM configuration:
+
+```bash
+export DEEPSEEK_API_KEY="your-key"
+# optional overrides
+export AI_CODING_LLM_BASE_URL="https://api.deepseek.com"
+export AI_CODING_LLM_MODEL="deepseek-chat"
+```
+
 CLI:
 
 ```bash
@@ -218,7 +229,8 @@ source /opt/hermes-agent/.venv/bin/activate
 python -m extensions.ai_coding.cli run \
   --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
   --task "fix empty password login bug and return False" \
-  --auto-patch
+  --auto-patch \
+  --patch-generator auto
 ```
 
 Expected:
@@ -243,6 +255,26 @@ Sandbox: exit=0, command succeeded
 ```
 
 This generator is intentionally narrow. It proves that the loop can generate and verify a patch, but it does not claim to be a general-purpose code generator yet.
+
+To require LLM generation rather than fallback:
+
+```bash
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug and return False" \
+  --auto-patch \
+  --patch-generator llm
+```
+
+To force the deterministic demo rule:
+
+```bash
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug and return False" \
+  --auto-patch \
+  --patch-generator rule
+```
 
 ## Docker Backend Check
 

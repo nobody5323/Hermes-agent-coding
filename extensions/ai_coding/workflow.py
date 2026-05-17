@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .config import get_config
 from .context_engineering import build_context_package
-from .patch_generator import generate_patch_for_task
+from .patch_generator import generate_patch_for_task_with_strategy
 from .rag.retriever import retrieve_code_context
 from .schemas import CodingTask, CodingTaskResult
 from .tools.patch import validate_patch_against_repo
@@ -27,6 +27,7 @@ def run_minimum_bugfix_loop(
     patch_text: str | None = None,
     project_id: str = "demo",
     sandbox_backend: str = "local",
+    patch_generator: str = "auto",
 ) -> CodingTaskResult:
     task = CodingTask(
         task_id=_task_id(user_request, repo_path),
@@ -39,7 +40,7 @@ def run_minimum_bugfix_loop(
     context = build_context_package(task, repository, retrieved)
     generated_patch = None
     if patch_text is None:
-        generated_patch = generate_patch_for_task(task, context)
+        generated_patch = generate_patch_for_task_with_strategy(task, context, strategy=patch_generator)
         if generated_patch.generated:
             patch_text = generated_patch.patch_text
     patch_preview = validate_patch_against_repo(repo_path, patch_text) if patch_text else None

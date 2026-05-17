@@ -47,3 +47,7 @@
 - Added tests for automatic patch generation through generator, workflow, CLI, and Hermes plugin handler.
 - Verified automatic Patch Generator: `python -m pytest extensions/ai_coding/tests` passed with 21 tests.
 - Verified CLI auto-patch command returned patch preview valid and sandbox exit 0.
+- Started LLM Patch Generator integration with DeepSeek/OpenAI-compatible Chat Completions support.
+- Added OpenAI-compatible LLM client, LLM patch prompt, LLM/rule/auto generation modes, and deterministic mock LLM tests.
+- Verified LLM integration test suite: `python -m pytest extensions/ai_coding/tests` passed with 23 tests.
+- Documented DeepSeek/OpenAI-compatible LLM patch generator configuration and generator modes.

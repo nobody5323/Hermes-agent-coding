@@ -39,6 +39,7 @@ def test_minimum_bugfix_loop_can_generate_patch():
         FIXTURE,
         "fix empty password login bug and return False",
         project_id="demo",
+        patch_generator="rule",
     )
     assert result.generated_patch is not None
     assert result.generated_patch.generated is True

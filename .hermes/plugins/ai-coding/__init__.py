@@ -235,6 +235,7 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
                 "patch_text": {"type": "string"},
                 "project_id": {"type": "string", "default": "demo"},
                 "sandbox": {"type": "string", "enum": ["local", "docker"], "default": "local"},
+                "patch_generator": {"type": "string", "enum": ["auto", "llm", "rule"], "default": "auto"},
             },
             ["repo_path", "task"],
         ),
@@ -244,6 +245,7 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
             patch_text=params.get("patch_text"),
             project_id=params.get("project_id", "demo"),
             sandbox_backend=params.get("sandbox", "local"),
+            patch_generator=params.get("patch_generator", "auto"),
         ),
     ),
 ]

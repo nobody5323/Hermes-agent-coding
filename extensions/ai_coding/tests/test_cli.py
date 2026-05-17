@@ -51,6 +51,8 @@ def test_cli_run_auto_patch(capsys):
             "--task",
             "fix empty password login bug and return False",
             "--auto-patch",
+            "--patch-generator",
+            "rule",
         ]
     )
     output = capsys.readouterr().out
@@ -72,3 +74,24 @@ def test_cli_requires_patch_or_auto_patch(capsys):
     error = capsys.readouterr().err
     assert exit_code == 2
     assert "--auto-patch" in error
+
+
+def test_cli_llm_generator_without_key_fails_cleanly(capsys, monkeypatch):
+    monkeypatch.delenv("AI_CODING_LLM_API_KEY", raising=False)
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    exit_code = main(
+        [
+            "run",
+            "--repo",
+            FIXTURE_REPO,
+            "--task",
+            "fix empty password login bug",
+            "--auto-patch",
+            "--patch-generator",
+            "llm",
+        ]
+    )
+    output = capsys.readouterr().out
+    assert exit_code == 2
+    assert "Patch generator errors:" in output

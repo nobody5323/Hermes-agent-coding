@@ -26,7 +26,13 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--auto-patch",
         action="store_true",
-        help="Allow the MVP rule-based patch generator when --patch is omitted",
+        help="Allow patch generation when --patch is omitted",
+    )
+    run_parser.add_argument(
+        "--patch-generator",
+        choices=["auto", "llm", "rule"],
+        default="auto",
+        help="Patch generator to use with --auto-patch. auto tries LLM then rule fallback.",
     )
     run_parser.add_argument("--project-id", default="demo", help="Project id for stable chunk ids")
     run_parser.add_argument(
@@ -50,13 +56,14 @@ def run_command(args: argparse.Namespace) -> int:
         patch_text=patch_text,
         project_id=args.project_id,
         sandbox_backend=args.sandbox,
+        patch_generator=args.patch_generator,
     )
 
     if args.json:
         print(result.model_dump_json(indent=2))
     else:
         print(result.final_summary)
-        if result.generated_patch and result.generated_patch.errors:
+        if result.generated_patch and result.generated_patch.errors and not result.generated_patch.generated:
             print("\nPatch generator errors:")
             for error in result.generated_patch.errors:
                 print(f"- {error}")
@@ -66,6 +73,8 @@ def run_command(args: argparse.Namespace) -> int:
                 print(f"- {error}")
 
     if result.patch_preview and not result.patch_preview.valid:
+        return 2
+    if result.generated_patch and not result.generated_patch.generated:
         return 2
     if result.sandbox_result:
         return result.sandbox_result.exit_code

@@ -78,6 +78,7 @@ def test_hermes_plugin_minimum_loop_handler_generates_patch():
         {
             "repo_path": FIXTURE_REPO,
             "task": "fix empty password login bug and return False",
+            "patch_generator": "rule",
         }
     )
     payload = json.loads(result)

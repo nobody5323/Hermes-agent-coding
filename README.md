@@ -43,7 +43,30 @@ Patch preview: 1 file(s), +1/-1, valid=True
 Sandbox: exit=0, command succeeded
 ```
 
-`--auto-patch` uses the conservative MVP rule-based Patch Generator. It currently supports the demo empty-password bugfix and is intentionally not a general code generator.
+`--auto-patch` defaults to `--patch-generator auto`, which tries the LLM Patch Generator first when API credentials are configured, then falls back to the conservative rule-based generator. The rule generator currently supports the demo empty-password bugfix and is intentionally not a general code generator.
+
+LLM Patch Generator configuration:
+
+```bash
+export DEEPSEEK_API_KEY="your-key"
+# optional overrides
+export AI_CODING_LLM_BASE_URL="https://api.deepseek.com"
+export AI_CODING_LLM_MODEL="deepseek-chat"
+
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug and return False" \
+  --auto-patch \
+  --patch-generator llm
+```
+
+Supported generator modes:
+
+```text
+auto  # LLM first, rule fallback
+llm   # require LLM generation
+rule  # use deterministic demo rule only
+```
 
 ## Docker Sandbox
 
@@ -111,8 +134,7 @@ docs/HERMES_INTEGRATION_DEMO.md
 
 ## 当前边界
 
-- 暂未接入真实 LLM。
 - 暂未接入 Qdrant / 完整 Reranker。
-- 自动 Patch Generator 当前是规则型 demo generator，只覆盖空密码登录 bugfix 示例。
+- 已接入 OpenAI-compatible LLM Patch Generator；未配置 API key 时 `auto` 模式会回退到规则型 demo generator。
 - 已提供 Hermes Plugin 骨架，并已在真实 Hermes Agent + DeepSeek 环境里完成端到端调用验证。
 - Docker Desktop 需要在测试机器上单独安装并启动。
