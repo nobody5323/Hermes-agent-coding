@@ -15,6 +15,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 6 | complete | Add Docker CLI sandbox runner |
 | 7 | complete | Initialize git repository, connect GitHub remote, commit and push |
 | 8 | complete | Add command-line entrypoint for server testing |
+| 9 | complete | Add Hermes project-local plugin skeleton |
 
 ## Key Decisions
 
@@ -25,6 +26,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - Current machine does not have Docker CLI installed, so Docker runner tests must not require a live daemon.
 - Do not commit generated caches or downloaded Docker installers.
 - CLI should default to local copied-repo sandbox and optionally support Docker sandbox.
+- Hermes project plugins live under `.hermes/plugins/` and require `HERMES_ENABLE_PROJECT_PLUGINS=true`.
 
 ## Errors Encountered
 

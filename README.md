@@ -59,9 +59,46 @@ python -m extensions.ai_coding.cli run \
 它会复制仓库、应用 patch，然后用 `docker run --network none` 在容器里执行 `python -m pytest`。
 如果本机没有启动 Docker daemon，会返回结构化 `SandboxResult`，不会中断主流程。
 
+## Hermes Plugin
+
+项目内已经包含 Hermes project-local plugin：
+
+```text
+.hermes/plugins/ai-coding/
+  plugin.yaml
+  __init__.py
+```
+
+启用项目插件后，Hermes 可以注册这些工具：
+
+```text
+ai_coding_scan_repository
+ai_coding_read_file_slice
+ai_coding_search_code
+ai_coding_retrieve_code_context
+ai_coding_build_context_package
+ai_coding_preview_patch
+ai_coding_validate_patch
+ai_coding_run_pytest_sandbox
+ai_coding_run_pytest_docker_sandbox
+ai_coding_run_minimum_loop
+```
+
+运行 Hermes 前设置：
+
+```bash
+export HERMES_ENABLE_PROJECT_PLUGINS=true
+```
+
+Windows PowerShell：
+
+```powershell
+$env:HERMES_ENABLE_PROJECT_PLUGINS = "true"
+```
+
 ## 当前边界
 
 - 暂未接入真实 LLM。
 - 暂未接入 Qdrant / 完整 Reranker。
-- 暂未做 Hermes Plugin 注册，只保留可包装成 tool 的 Python 函数。
+- 已提供 Hermes Plugin 骨架；仍需在真实 Hermes Agent 环境里做端到端调用验证。
 - Docker Desktop 需要在测试机器上单独安装并启动。

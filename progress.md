@@ -37,3 +37,8 @@
 - Added `extensions.ai_coding.cli`, `examples/bugfix_empty_password.diff`, and CLI tests.
 - Verified CLI work: `python -m pytest extensions/ai_coding/tests` passed with 13 tests.
 - Verified command: `python -m extensions.ai_coding.cli run --repo extensions/ai_coding/tests/fixtures/demo_python_repo --task "fix empty password login bug" --patch examples/bugfix_empty_password.diff` returned sandbox exit 0.
+- Started Hermes project-local plugin skeleton based on official `ctx.register_tool(...)` plugin API.
+- Added `.hermes/plugins/ai-coding` with `plugin.yaml`, `register(ctx)`, tool wrappers, and skill registration.
+- Added plugin tests with a fake Hermes context.
+- Verified plugin work: `python -m pytest extensions/ai_coding/tests` passed with 16 tests.
+- Re-ran CLI smoke command successfully after plugin changes.
