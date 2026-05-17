@@ -212,7 +212,7 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
             "Run pytest in Docker after applying an optional patch.",
             {
                 "repo_path": {"type": "string"},
-                "patch_text": {"type": "string"},
+                "patch_text": {"type": "string", "description": "Optional. If omitted, the MVP generator may create a demo patch."},
                 "image": {"type": "string"},
             },
             ["repo_path"],

@@ -23,6 +23,11 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--repo", required=True, help="Target repository path")
     run_parser.add_argument("--task", required=True, help="User coding task")
     run_parser.add_argument("--patch", help="Unified diff patch file to preview and verify")
+    run_parser.add_argument(
+        "--auto-patch",
+        action="store_true",
+        help="Allow the MVP rule-based patch generator when --patch is omitted",
+    )
     run_parser.add_argument("--project-id", default="demo", help="Project id for stable chunk ids")
     run_parser.add_argument(
         "--sandbox",
@@ -36,6 +41,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def run_command(args: argparse.Namespace) -> int:
     patch_text = _read_patch(args.patch)
+    if args.patch is None and not args.auto_patch:
+        print("No --patch provided. Pass --auto-patch to use the MVP rule-based patch generator.", file=sys.stderr)
+        return 2
     result = run_minimum_bugfix_loop(
         args.repo,
         args.task,
@@ -48,6 +56,10 @@ def run_command(args: argparse.Namespace) -> int:
         print(result.model_dump_json(indent=2))
     else:
         print(result.final_summary)
+        if result.generated_patch and result.generated_patch.errors:
+            print("\nPatch generator errors:")
+            for error in result.generated_patch.errors:
+                print(f"- {error}")
         if result.patch_preview and result.patch_preview.errors:
             print("\nPatch errors:")
             for error in result.patch_preview.errors:

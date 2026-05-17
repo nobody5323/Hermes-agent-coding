@@ -16,7 +16,8 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 7 | complete | Initialize git repository, connect GitHub remote, commit and push |
 | 8 | complete | Add command-line entrypoint for server testing |
 | 9 | complete | Add Hermes project-local plugin skeleton |
-| 10 | in_progress | Add deployment and demo documentation |
+| 10 | complete | Add deployment and demo documentation |
+| 11 | complete | Add rule-based automatic Patch Generator for MVP demo |
 
 ## Key Decisions
 
@@ -29,6 +30,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - CLI should default to local copied-repo sandbox and optionally support Docker sandbox.
 - Hermes project plugins live under `.hermes/plugins/` and require `HERMES_ENABLE_PROJECT_PLUGINS=true`.
 - The real Hermes integration has been verified on the server with DeepSeek and `ai_coding_run_minimum_loop`.
+- Automatic patch generation starts as a conservative rule-based generator for the demo bugfix, not a general LLM patcher.
 
 ## Errors Encountered
 

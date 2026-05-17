@@ -32,3 +32,17 @@ def test_minimum_bugfix_loop_runs_patch_and_pytest():
     assert result.sandbox_result is not None
     assert result.sandbox_result.exit_code == 0
     assert "src/user_service.py" in result.context_package.markdown
+
+
+def test_minimum_bugfix_loop_can_generate_patch():
+    result = run_minimum_bugfix_loop(
+        FIXTURE,
+        "fix empty password login bug and return False",
+        project_id="demo",
+    )
+    assert result.generated_patch is not None
+    assert result.generated_patch.generated is True
+    assert result.patch_preview is not None
+    assert result.patch_preview.valid is True
+    assert result.sandbox_result is not None
+    assert result.sandbox_result.exit_code == 0

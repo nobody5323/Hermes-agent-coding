@@ -29,6 +29,11 @@ python -m extensions.ai_coding.cli run \
   --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
   --task "fix empty password login bug" \
   --patch examples/bugfix_empty_password.diff
+
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug and return False" \
+  --auto-patch
 ```
 
 预期 smoke 输出包含：
@@ -37,6 +42,8 @@ python -m extensions.ai_coding.cli run \
 Patch preview: 1 file(s), +1/-1, valid=True
 Sandbox: exit=0, command succeeded
 ```
+
+`--auto-patch` uses the conservative MVP rule-based Patch Generator. It currently supports the demo empty-password bugfix and is intentionally not a general code generator.
 
 ## Docker Sandbox
 
@@ -106,5 +113,6 @@ docs/HERMES_INTEGRATION_DEMO.md
 
 - 暂未接入真实 LLM。
 - 暂未接入 Qdrant / 完整 Reranker。
+- 自动 Patch Generator 当前是规则型 demo generator，只覆盖空密码登录 bugfix 示例。
 - 已提供 Hermes Plugin 骨架，并已在真实 Hermes Agent + DeepSeek 环境里完成端到端调用验证。
 - Docker Desktop 需要在测试机器上单独安装并启动。

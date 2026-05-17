@@ -68,3 +68,19 @@ def test_hermes_plugin_minimum_loop_handler():
     payload = json.loads(result)
     assert payload["success"] is True
     assert payload["data"]["sandbox_result"]["exit_code"] == 0
+
+
+def test_hermes_plugin_minimum_loop_handler_generates_patch():
+    plugin = load_plugin()
+    ctx = FakeHermesContext()
+    plugin.register(ctx)
+    result = ctx.tools["ai_coding_run_minimum_loop"]["handler"](
+        {
+            "repo_path": FIXTURE_REPO,
+            "task": "fix empty password login bug and return False",
+        }
+    )
+    payload = json.loads(result)
+    assert payload["success"] is True
+    assert payload["data"]["generated_patch"]["generated"] is True
+    assert payload["data"]["sandbox_result"]["exit_code"] == 0

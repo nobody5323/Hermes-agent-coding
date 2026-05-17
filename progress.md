@@ -43,3 +43,7 @@
 - Verified plugin work: `python -m pytest extensions/ai_coding/tests` passed with 16 tests.
 - Re-ran CLI smoke command successfully after plugin changes.
 - Server validation passed: Hermes ran on DeepSeek, loaded the project plugin through a symlink, scanned `/opt/Hermes-agent-coding`, and completed `ai_coding_run_minimum_loop` with sandbox exit 0.
+- Started rule-based automatic Patch Generator so `run_minimum_bugfix_loop` can work without user-provided patch text for the demo bug.
+- Added tests for automatic patch generation through generator, workflow, CLI, and Hermes plugin handler.
+- Verified automatic Patch Generator: `python -m pytest extensions/ai_coding/tests` passed with 21 tests.
+- Verified CLI auto-patch command returned patch preview valid and sandbox exit 0.

@@ -40,3 +40,35 @@ def test_cli_run_json_output(capsys):
     assert exit_code == 0
     assert '"final_summary"' in output
     assert '"sandbox_result"' in output
+
+
+def test_cli_run_auto_patch(capsys):
+    exit_code = main(
+        [
+            "run",
+            "--repo",
+            FIXTURE_REPO,
+            "--task",
+            "fix empty password login bug and return False",
+            "--auto-patch",
+        ]
+    )
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Patch generator: generated=True" in output
+    assert "Sandbox: exit=0" in output
+
+
+def test_cli_requires_patch_or_auto_patch(capsys):
+    exit_code = main(
+        [
+            "run",
+            "--repo",
+            FIXTURE_REPO,
+            "--task",
+            "fix empty password login bug",
+        ]
+    )
+    error = capsys.readouterr().err
+    assert exit_code == 2
+    assert "--auto-patch" in error

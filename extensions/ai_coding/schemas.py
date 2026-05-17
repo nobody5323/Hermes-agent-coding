@@ -77,6 +77,15 @@ class PatchPreview(BaseModel):
     patch_text: str = ""
 
 
+class GeneratedPatch(BaseModel):
+    generated: bool
+    patch_text: str = ""
+    strategy: str = ""
+    target_file: str | None = None
+    reason: str = ""
+    errors: list[str] = Field(default_factory=list)
+
+
 class SandboxResult(BaseModel):
     command: str
     exit_code: int
@@ -91,6 +100,7 @@ class SandboxResult(BaseModel):
 class CodingTaskResult(BaseModel):
     task: CodingTask
     context_package: ContextPackage
+    generated_patch: GeneratedPatch | None = None
     patch_preview: PatchPreview | None = None
     sandbox_result: SandboxResult | None = None
     final_summary: str

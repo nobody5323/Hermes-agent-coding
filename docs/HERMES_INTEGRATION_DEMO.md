@@ -205,6 +205,45 @@ Expected:
 Sandbox: exit=0, command succeeded
 ```
 
+## Automatic Patch Generator Demo
+
+The MVP includes a conservative rule-based Patch Generator for the empty-password bugfix demo. This allows the minimum loop to run without manually passing `examples/bugfix_empty_password.diff`.
+
+CLI:
+
+```bash
+cd /opt/Hermes-agent-coding
+source /opt/hermes-agent/.venv/bin/activate
+
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug and return False" \
+  --auto-patch
+```
+
+Expected:
+
+```text
+Patch preview: 1 file(s), +1/-1, valid=True
+Patch generator: generated=True, strategy=rule_based_empty_password
+Sandbox: exit=0, command succeeded
+```
+
+Hermes plugin:
+
+```bash
+hermes chat -q "Use ai_coding_run_minimum_loop on repo /opt/Hermes-agent-coding/extensions/ai_coding/tests/fixtures/demo_python_repo. The task is 'fix empty password login bug and return False'. Do not provide patch text; use the automatic patch generator if available."
+```
+
+Expected:
+
+```text
+Patch generator: generated=True
+Sandbox: exit=0, command succeeded
+```
+
+This generator is intentionally narrow. It proves that the loop can generate and verify a patch, but it does not claim to be a general-purpose code generator yet.
+
 ## Docker Backend Check
 
 The MVP uses the local copied-repo sandbox by default. To test Docker:
