@@ -13,7 +13,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 4 | complete | Add and run smoke tests for the minimum loop |
 | 5 | complete | Summarize usage and next steps |
 | 6 | complete | Add Docker CLI sandbox runner |
-| 7 | in_progress | Initialize git repository, connect GitHub remote, commit and push |
+| 7 | complete | Initialize git repository, connect GitHub remote, commit and push |
 
 ## Key Decisions
 

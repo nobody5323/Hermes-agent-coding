@@ -30,3 +30,6 @@
 - Added `.gitignore` to exclude Python caches, local virtualenvs, and downloaded installers.
 - Pre-commit verification passed: `python -m pytest extensions/ai_coding/tests` reported 11 passed.
 - Standard `.git` directory was not writable in the Codex sandbox after initialization, so publication will use `.gitrepo` as an alternate local git metadata directory.
+- Fetched remote `main`, preserved remote `README.md`/`LICENSE`, and expanded README with MVP usage.
+- Created commit `970eb2f` (`Implement AI coding MVP loop`) with `origin/main` as parent.
+- Pushed `main` to `https://github.com/nobody5323/Hermes-agent-coding.git`; remote now points to `970eb2ffdb3318ff5ae6e163120f15cb46299743`.
