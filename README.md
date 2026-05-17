@@ -25,6 +25,10 @@ extensions/ai_coding/tests/    # demo 仓库和 smoke tests
 ```bash
 python -m pytest extensions/ai_coding/tests
 python demo_minimum_loop.py
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug" \
+  --patch examples/bugfix_empty_password.diff
 ```
 
 预期 smoke 输出包含：
@@ -40,6 +44,16 @@ Sandbox: exit=0, command succeeded
 
 ```python
 from extensions.ai_coding.tools.sandbox import run_pytest_docker_sandbox
+```
+
+CLI 中也可以切换到 Docker 后端：
+
+```bash
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug" \
+  --patch examples/bugfix_empty_password.diff \
+  --sandbox docker
 ```
 
 它会复制仓库、应用 patch，然后用 `docker run --network none` 在容器里执行 `python -m pytest`。

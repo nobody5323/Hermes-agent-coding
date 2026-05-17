@@ -11,7 +11,7 @@ from .rag.retriever import retrieve_code_context
 from .schemas import CodingTask, CodingTaskResult
 from .tools.patch import validate_patch_against_repo
 from .tools.repository import scan_repository
-from .tools.sandbox import run_pytest_sandbox
+from .tools.sandbox import run_pytest_docker_sandbox, run_pytest_sandbox
 
 
 def _task_id(user_request: str, repo_path: str | Path) -> str:
@@ -25,6 +25,7 @@ def run_minimum_bugfix_loop(
     *,
     patch_text: str | None = None,
     project_id: str = "demo",
+    sandbox_backend: str = "local",
 ) -> CodingTaskResult:
     task = CodingTask(
         task_id=_task_id(user_request, repo_path),
@@ -38,7 +39,12 @@ def run_minimum_bugfix_loop(
     patch_preview = validate_patch_against_repo(repo_path, patch_text) if patch_text else None
     sandbox_result = None
     if patch_preview and patch_preview.valid:
-        sandbox_result = run_pytest_sandbox(repo_path, patch_text=patch_text)
+        if sandbox_backend == "docker":
+            sandbox_result = run_pytest_docker_sandbox(repo_path, patch_text=patch_text)
+        elif sandbox_backend == "local":
+            sandbox_result = run_pytest_sandbox(repo_path, patch_text=patch_text)
+        else:
+            raise ValueError(f"unsupported sandbox backend: {sandbox_backend}")
 
     final_parts = [
         f"Task {task.task_id}: {task.task_type}",

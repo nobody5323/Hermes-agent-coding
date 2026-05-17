@@ -33,3 +33,7 @@
 - Fetched remote `main`, preserved remote `README.md`/`LICENSE`, and expanded README with MVP usage.
 - Created commit `970eb2f` (`Implement AI coding MVP loop`) with `origin/main` as parent.
 - Pushed `main` to `https://github.com/nobody5323/Hermes-agent-coding.git`; remote now points to `970eb2ffdb3318ff5ae6e163120f15cb46299743`.
+- Started CLI entrypoint work so server testing can run without editing `demo_minimum_loop.py`.
+- Added `extensions.ai_coding.cli`, `examples/bugfix_empty_password.diff`, and CLI tests.
+- Verified CLI work: `python -m pytest extensions/ai_coding/tests` passed with 13 tests.
+- Verified command: `python -m extensions.ai_coding.cli run --repo extensions/ai_coding/tests/fixtures/demo_python_repo --task "fix empty password login bug" --patch examples/bugfix_empty_password.diff` returned sandbox exit 0.

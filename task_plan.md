@@ -14,6 +14,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 5 | complete | Summarize usage and next steps |
 | 6 | complete | Add Docker CLI sandbox runner |
 | 7 | complete | Initialize git repository, connect GitHub remote, commit and push |
+| 8 | complete | Add command-line entrypoint for server testing |
 
 ## Key Decisions
 
@@ -23,6 +24,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - Use Pydantic v2 schemas because the local environment already has Pydantic installed.
 - Current machine does not have Docker CLI installed, so Docker runner tests must not require a live daemon.
 - Do not commit generated caches or downloaded Docker installers.
+- CLI should default to local copied-repo sandbox and optionally support Docker sandbox.
 
 ## Errors Encountered
 
