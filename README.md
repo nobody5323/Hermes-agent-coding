@@ -96,9 +96,15 @@ Windows PowerShell：
 $env:HERMES_ENABLE_PROJECT_PLUGINS = "true"
 ```
 
+服务器端到端演示记录见：
+
+```text
+docs/HERMES_INTEGRATION_DEMO.md
+```
+
 ## 当前边界
 
 - 暂未接入真实 LLM。
 - 暂未接入 Qdrant / 完整 Reranker。
-- 已提供 Hermes Plugin 骨架；仍需在真实 Hermes Agent 环境里做端到端调用验证。
+- 已提供 Hermes Plugin 骨架，并已在真实 Hermes Agent + DeepSeek 环境里完成端到端调用验证。
 - Docker Desktop 需要在测试机器上单独安装并启动。
