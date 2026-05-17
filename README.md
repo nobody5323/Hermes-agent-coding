@@ -51,7 +51,7 @@ LLM Patch Generator configuration:
 export DEEPSEEK_API_KEY="your-key"
 # optional overrides
 export AI_CODING_LLM_BASE_URL="https://api.deepseek.com"
-export AI_CODING_LLM_MODEL="deepseek-chat"
+export AI_CODING_LLM_MODEL="deepseek-v4-pro"
 
 python -m extensions.ai_coding.cli run \
   --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
@@ -59,6 +59,8 @@ python -m extensions.ai_coding.cli run \
   --auto-patch \
   --patch-generator llm
 ```
+
+The LLM prompt includes line-numbered file context. Returned patches are normalized into git-style diffs, so a simplified `--- a/file` / `+++ b/file` unified diff can still be repaired before validation when its context matches the real file.
 
 Supported generator modes:
 

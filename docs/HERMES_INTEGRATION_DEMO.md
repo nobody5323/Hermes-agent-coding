@@ -217,8 +217,10 @@ LLM configuration:
 export DEEPSEEK_API_KEY="your-key"
 # optional overrides
 export AI_CODING_LLM_BASE_URL="https://api.deepseek.com"
-export AI_CODING_LLM_MODEL="deepseek-chat"
+export AI_CODING_LLM_MODEL="deepseek-v4-pro"
 ```
+
+The LLM Patch Generator sends line-numbered file context and normalizes returned patches into git-style diffs. If the model returns a simplified unified diff with matching real file context, the generator rebuilds a valid `diff --git` patch before validation.
 
 CLI:
 

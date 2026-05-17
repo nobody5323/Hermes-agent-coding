@@ -19,6 +19,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 10 | complete | Add deployment and demo documentation |
 | 11 | complete | Add rule-based automatic Patch Generator for MVP demo |
 | 12 | complete | Add LLM-based Patch Generator with rule fallback |
+| 13 | complete | Repair simplified LLM diffs into valid git-style patches |
 
 ## Key Decisions
 
@@ -33,6 +34,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - The real Hermes integration has been verified on the server with DeepSeek and `ai_coding_run_minimum_loop`.
 - Automatic patch generation starts as a conservative rule-based generator for the demo bugfix, not a general LLM patcher.
 - LLM patch generation should use an OpenAI-compatible Chat Completions API and keep the rule generator as fallback.
+- LLM patch output should be normalized against real repository file content before validation, because models may return simplified unified diffs or stale hunk line numbers.
 
 ## Errors Encountered
 
@@ -45,3 +47,4 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | Patch still did not apply after expanding hunk | Fifth smoke test run | Compared with `git diff --no-index`; use one blank context line and `@@ -5,5 +5,5 @@ USERS = {` |
 | `git apply` still rejected whitespace-sensitive hunk while `--ignore-whitespace` passed | Sixth diagnosis | Use `git apply --ignore-whitespace` for patch validation and sandbox application in MVP |
 | `docker` command not found | Docker sandbox check | Implement Docker CLI support with structured unavailable result and unit-test command construction |
+| DeepSeek generated a simplified diff that `git apply --check` rejected as corrupt | Server LLM patch test | Add line-numbered file context to the LLM prompt and repair matching simplified diffs into git-style patches |

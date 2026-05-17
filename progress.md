@@ -51,3 +51,7 @@
 - Added OpenAI-compatible LLM client, LLM patch prompt, LLM/rule/auto generation modes, and deterministic mock LLM tests.
 - Verified LLM integration test suite: `python -m pytest extensions/ai_coding/tests` passed with 23 tests.
 - Documented DeepSeek/OpenAI-compatible LLM patch generator configuration and generator modes.
+- Server LLM test showed DeepSeek generated the right semantic fix but returned a simplified diff with bad hunk metadata.
+- Added line-numbered full file context to the LLM patch prompt and a normalizer that rebuilds matching simplified diffs into git-style patches.
+- Added regression coverage for simplified LLM diff repair.
+- Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 24 tests.
