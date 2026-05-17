@@ -62,6 +62,17 @@ python -m extensions.ai_coding.cli run \
 
 The LLM prompt includes line-numbered file context. Returned patches are normalized into git-style diffs, so a simplified `--- a/file` / `+++ b/file` unified diff can still be repaired before validation when its context matches the real file.
 
+By default the loop validates and tests patches in a copied sandbox only. To write a verified patch into the real repository, pass `--apply`:
+
+```bash
+python -m extensions.ai_coding.cli run \
+  --repo extensions/ai_coding/tests/fixtures/demo_python_repo \
+  --task "fix empty password login bug and return False" \
+  --auto-patch \
+  --patch-generator llm \
+  --apply
+```
+
 Supported generator modes:
 
 ```text
@@ -111,6 +122,7 @@ ai_coding_retrieve_code_context
 ai_coding_build_context_package
 ai_coding_preview_patch
 ai_coding_validate_patch
+ai_coding_apply_patch
 ai_coding_run_pytest_sandbox
 ai_coding_run_pytest_docker_sandbox
 ai_coding_run_minimum_loop

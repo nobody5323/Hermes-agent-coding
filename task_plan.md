@@ -20,6 +20,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 11 | complete | Add rule-based automatic Patch Generator for MVP demo |
 | 12 | complete | Add LLM-based Patch Generator with rule fallback |
 | 13 | complete | Repair simplified LLM diffs into valid git-style patches |
+| 14 | complete | Add explicit verified patch apply flow |
 
 ## Key Decisions
 
@@ -35,6 +36,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - Automatic patch generation starts as a conservative rule-based generator for the demo bugfix, not a general LLM patcher.
 - LLM patch generation should use an OpenAI-compatible Chat Completions API and keep the rule generator as fallback.
 - LLM patch output should be normalized against real repository file content before validation, because models may return simplified unified diffs or stale hunk line numbers.
+- Applying a patch to the real repository must be explicit. The default loop keeps writes inside a sandbox copy.
 
 ## Errors Encountered
 
@@ -48,3 +50,4 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | `git apply` still rejected whitespace-sensitive hunk while `--ignore-whitespace` passed | Sixth diagnosis | Use `git apply --ignore-whitespace` for patch validation and sandbox application in MVP |
 | `docker` command not found | Docker sandbox check | Implement Docker CLI support with structured unavailable result and unit-test command construction |
 | DeepSeek generated a simplified diff that `git apply --check` rejected as corrupt | Server LLM patch test | Add line-numbered file context to the LLM prompt and repair matching simplified diffs into git-style patches |
+| `git apply` returned success but skipped patches in tests under `.tmp-tests/` | Apply flow tests | Set `GIT_CEILING_DIRECTORIES` for patch commands and write temporary diff files with LF newlines |

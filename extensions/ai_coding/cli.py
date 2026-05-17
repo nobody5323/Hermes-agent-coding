@@ -42,6 +42,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Verification backend; docker requires Docker daemon",
     )
     run_parser.add_argument("--json", action="store_true", help="Print full JSON result")
+    run_parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Apply the validated patch to the real repository after sandbox verification passes",
+    )
     return parser
 
 
@@ -57,6 +62,7 @@ def run_command(args: argparse.Namespace) -> int:
         project_id=args.project_id,
         sandbox_backend=args.sandbox,
         patch_generator=args.patch_generator,
+        apply_to_repo=args.apply,
     )
 
     if args.json:
@@ -71,13 +77,20 @@ def run_command(args: argparse.Namespace) -> int:
             print("\nPatch errors:")
             for error in result.patch_preview.errors:
                 print(f"- {error}")
+        if result.apply_result and result.apply_result.errors:
+            print("\nApply errors:")
+            for error in result.apply_result.errors:
+                print(f"- {error}")
 
     if result.patch_preview and not result.patch_preview.valid:
         return 2
     if result.generated_patch and not result.generated_patch.generated:
         return 2
     if result.sandbox_result:
-        return result.sandbox_result.exit_code
+        if result.sandbox_result.exit_code != 0:
+            return result.sandbox_result.exit_code
+    if result.apply_result and not result.apply_result.applied:
+        return 2
     return 0
 
 

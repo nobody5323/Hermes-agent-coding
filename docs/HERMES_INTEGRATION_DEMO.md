@@ -146,6 +146,7 @@ ai_coding_retrieve_code_context
 ai_coding_build_context_package
 ai_coding_preview_patch
 ai_coding_validate_patch
+ai_coding_apply_patch
 ai_coding_run_pytest_sandbox
 ai_coding_run_pytest_docker_sandbox
 ai_coding_run_minimum_loop
@@ -222,6 +223,8 @@ export AI_CODING_LLM_MODEL="deepseek-v4-pro"
 
 The LLM Patch Generator sends line-numbered file context and normalizes returned patches into git-style diffs. If the model returns a simplified unified diff with matching real file context, the generator rebuilds a valid `diff --git` patch before validation.
 
+By default the minimum loop does not modify the real repository. It applies the patch only inside the sandbox copy. To apply after validation and sandbox success, use `--apply` in the CLI or pass `apply=true` to `ai_coding_run_minimum_loop`.
+
 CLI:
 
 ```bash
@@ -247,6 +250,12 @@ Hermes plugin:
 
 ```bash
 hermes chat -q "Use ai_coding_run_minimum_loop on repo /opt/Hermes-agent-coding/extensions/ai_coding/tests/fixtures/demo_python_repo. The task is 'fix empty password login bug and return False'. Do not provide patch text; use the automatic patch generator if available."
+```
+
+Apply a verified patch to the real repository:
+
+```bash
+hermes chat -q "Call ai_coding_run_minimum_loop with repo_path='/opt/Hermes-agent-coding/extensions/ai_coding/tests/fixtures/demo_python_repo', task='fix empty password login bug and return False', patch_generator='llm', apply=true. Do not provide patch_text."
 ```
 
 Expected:

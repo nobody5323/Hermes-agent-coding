@@ -2,16 +2,23 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 import tempfile
 from pathlib import Path
 
-from ..schemas import PatchFileChange, PatchPreview
+from ..schemas import PatchApplyResult, PatchFileChange, PatchPreview
 
 
 DIFF_HEADER_RE = re.compile(r"^\+\+\+\s+b/(.+)$")
 OLD_HEADER_RE = re.compile(r"^---\s+a/(.+)$")
+
+
+def _git_env_for_repo(root: Path) -> dict[str, str]:
+    env = os.environ.copy()
+    env["GIT_CEILING_DIRECTORIES"] = str(root.parent)
+    return env
 
 
 def preview_patch(patch_text: str) -> PatchPreview:
@@ -77,7 +84,7 @@ def validate_patch_against_repo(repo_path: str | Path, patch_text: str) -> Patch
         if not target.exists():
             errors.append(f"target file does not exist: {change.path}")
     if not errors:
-        with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".diff", delete=False) as handle:
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", suffix=".diff", delete=False) as handle:
             handle.write(patch_text)
             patch_file = Path(handle.name)
         try:
@@ -87,9 +94,51 @@ def validate_patch_against_repo(repo_path: str | Path, patch_text: str) -> Patch
                 text=True,
                 capture_output=True,
                 timeout=10,
+                env=_git_env_for_repo(root),
             )
             if check.returncode != 0:
                 errors.append((check.stderr or check.stdout or "patch does not apply").strip())
         finally:
             patch_file.unlink(missing_ok=True)
     return preview.model_copy(update={"valid": not errors, "errors": errors})
+
+
+def apply_patch_to_repo(repo_path: str | Path, patch_text: str) -> PatchApplyResult:
+    root = Path(repo_path).resolve()
+    preview = validate_patch_against_repo(root, patch_text)
+    if not preview.valid:
+        return PatchApplyResult(
+            applied=False,
+            files=preview.files,
+            summary="patch was not applied because validation failed",
+            errors=preview.errors,
+        )
+
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", newline="\n", suffix=".diff", delete=False) as handle:
+        handle.write(patch_text)
+        patch_file = Path(handle.name)
+    try:
+        process = subprocess.run(
+            ["git", "apply", str(patch_file)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            timeout=10,
+            env=_git_env_for_repo(root),
+        )
+    finally:
+        patch_file.unlink(missing_ok=True)
+
+    if process.returncode != 0:
+        return PatchApplyResult(
+            applied=False,
+            files=preview.files,
+            summary="git apply failed",
+            errors=[(process.stderr or process.stdout or "patch failed to apply").strip()],
+        )
+
+    return PatchApplyResult(
+        applied=True,
+        files=preview.files,
+        summary=f"applied patch: {preview.summary}",
+    )

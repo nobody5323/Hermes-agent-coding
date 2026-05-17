@@ -55,3 +55,6 @@
 - Added line-numbered full file context to the LLM patch prompt and a normalizer that rebuilds matching simplified diffs into git-style patches.
 - Added regression coverage for simplified LLM diff repair.
 - Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 24 tests.
+- Added explicit verified patch apply flow: `PatchApplyResult`, `apply_patch_to_repo`, CLI `--apply`, Hermes `ai_coding_apply_patch`, and `apply` support on `ai_coding_run_minimum_loop`.
+- Fixed Windows/nested-repo `git apply` behavior by setting `GIT_CEILING_DIRECTORIES` and writing temporary diff files with LF newlines.
+- Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 27 tests.

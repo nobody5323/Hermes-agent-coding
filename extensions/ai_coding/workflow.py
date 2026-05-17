@@ -9,8 +9,8 @@ from .config import get_config
 from .context_engineering import build_context_package
 from .patch_generator import generate_patch_for_task_with_strategy
 from .rag.retriever import retrieve_code_context
-from .schemas import CodingTask, CodingTaskResult
-from .tools.patch import validate_patch_against_repo
+from .schemas import CodingTask, CodingTaskResult, PatchApplyResult
+from .tools.patch import apply_patch_to_repo, validate_patch_against_repo
 from .tools.repository import scan_repository
 from .tools.sandbox import run_pytest_docker_sandbox, run_pytest_sandbox
 
@@ -28,6 +28,7 @@ def run_minimum_bugfix_loop(
     project_id: str = "demo",
     sandbox_backend: str = "local",
     patch_generator: str = "auto",
+    apply_to_repo: bool = False,
 ) -> CodingTaskResult:
     task = CodingTask(
         task_id=_task_id(user_request, repo_path),
@@ -52,6 +53,16 @@ def run_minimum_bugfix_loop(
             sandbox_result = run_pytest_sandbox(repo_path, patch_text=patch_text)
         else:
             raise ValueError(f"unsupported sandbox backend: {sandbox_backend}")
+    apply_result = None
+    if apply_to_repo:
+        if patch_preview and patch_preview.valid and sandbox_result and sandbox_result.exit_code == 0 and patch_text:
+            apply_result = apply_patch_to_repo(repo_path, patch_text)
+        else:
+            apply_result = PatchApplyResult(
+                applied=False,
+                summary="patch was not applied because validation or sandbox verification did not pass",
+                errors=["apply requires a valid patch preview and sandbox exit code 0"],
+            )
 
     final_parts = [
         f"Task {task.task_id}: {task.task_type}",
@@ -64,12 +75,15 @@ def run_minimum_bugfix_loop(
         final_parts.append(f"Patch generator: generated={generated_patch.generated}, strategy={generated_patch.strategy}")
     if sandbox_result:
         final_parts.append(f"Sandbox: exit={sandbox_result.exit_code}, {sandbox_result.summary}")
+    if apply_result:
+        final_parts.append(f"Apply: applied={apply_result.applied}, {apply_result.summary}")
 
     return CodingTaskResult(
         task=task,
         context_package=context,
         generated_patch=generated_patch,
         patch_preview=patch_preview,
+        apply_result=apply_result,
         sandbox_result=sandbox_result,
         final_summary="\n".join(final_parts),
     )

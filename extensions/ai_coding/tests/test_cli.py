@@ -1,8 +1,24 @@
+import shutil
+import tempfile
+from contextlib import contextmanager
+from pathlib import Path
+
 from extensions.ai_coding.cli import main
 
 
 FIXTURE_REPO = "extensions/ai_coding/tests/fixtures/demo_python_repo"
 PATCH_FILE = "examples/bugfix_empty_password.diff"
+FIXTURE_PATH = Path(FIXTURE_REPO)
+
+
+@contextmanager
+def workspace_temp_repo():
+    temp_root = Path(".tmp-tests")
+    temp_root.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="cli-", dir=temp_root) as temp_dir:
+        repo = Path(temp_dir) / "repo"
+        shutil.copytree(FIXTURE_PATH, repo, ignore=shutil.ignore_patterns("__pycache__"))
+        yield repo
 
 
 def test_cli_run_local_sandbox(capsys):
@@ -95,3 +111,23 @@ def test_cli_llm_generator_without_key_fails_cleanly(capsys, monkeypatch):
     output = capsys.readouterr().out
     assert exit_code == 2
     assert "Patch generator errors:" in output
+
+
+def test_cli_apply_modifies_repo_after_sandbox_passes(capsys):
+    with workspace_temp_repo() as repo:
+        exit_code = main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--task",
+                "fix empty password login bug",
+                "--patch",
+                PATCH_FILE,
+                "--apply",
+            ]
+        )
+        output = capsys.readouterr().out
+        assert exit_code == 0
+        assert "Apply: applied=True" in output
+        assert "return False" in (repo / "src" / "user_service.py").read_text(encoding="utf-8")

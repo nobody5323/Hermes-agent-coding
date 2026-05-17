@@ -34,7 +34,7 @@ def _copy_repo(source: Path, destination: Path) -> None:
 
 def _apply_patch(copied: Path, patch_text: str, temp_dir: str | Path, timeout_seconds: int) -> SandboxResult | None:
     patch_file = Path(temp_dir) / "change.diff"
-    patch_file.write_text(patch_text, encoding="utf-8")
+    patch_file.write_text(patch_text, encoding="utf-8", newline="\n")
     apply_process = subprocess.run(
         ["git", "apply", "--ignore-whitespace", str(patch_file)],
         cwd=copied,

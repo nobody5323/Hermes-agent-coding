@@ -9,7 +9,7 @@ from typing import Any, Callable
 from extensions.ai_coding.context_engineering import build_context_package
 from extensions.ai_coding.rag.retriever import retrieve_code_context
 from extensions.ai_coding.schemas import CodingTask
-from extensions.ai_coding.tools.patch import preview_patch, validate_patch_against_repo
+from extensions.ai_coding.tools.patch import apply_patch_to_repo, preview_patch, validate_patch_against_repo
 from extensions.ai_coding.tools.repository import read_file_slice, scan_repository, search_code
 from extensions.ai_coding.tools.sandbox import run_pytest_docker_sandbox, run_pytest_sandbox
 from extensions.ai_coding.workflow import run_minimum_bugfix_loop
@@ -194,6 +194,17 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
         lambda params: validate_patch_against_repo(params["repo_path"], params["patch_text"]),
     ),
     (
+        "ai_coding_apply_patch",
+        "Apply a validated unified diff patch to the real repository.",
+        _schema(
+            "ai_coding_apply_patch",
+            "Apply a validated unified diff patch to the real repository.",
+            {"repo_path": {"type": "string"}, "patch_text": {"type": "string"}},
+            ["repo_path", "patch_text"],
+        ),
+        lambda params: apply_patch_to_repo(params["repo_path"], params["patch_text"]),
+    ),
+    (
         "ai_coding_run_pytest_sandbox",
         "Run pytest in a copied local repository sandbox.",
         _schema(
@@ -236,6 +247,7 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
                 "project_id": {"type": "string", "default": "demo"},
                 "sandbox": {"type": "string", "enum": ["local", "docker"], "default": "local"},
                 "patch_generator": {"type": "string", "enum": ["auto", "llm", "rule"], "default": "auto"},
+                "apply": {"type": "boolean", "default": False},
             },
             ["repo_path", "task"],
         ),
@@ -246,6 +258,7 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
             project_id=params.get("project_id", "demo"),
             sandbox_backend=params.get("sandbox", "local"),
             patch_generator=params.get("patch_generator", "auto"),
+            apply_to_repo=params.get("apply", False),
         ),
     ),
 ]

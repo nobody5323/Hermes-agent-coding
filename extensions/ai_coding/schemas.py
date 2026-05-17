@@ -77,6 +77,13 @@ class PatchPreview(BaseModel):
     patch_text: str = ""
 
 
+class PatchApplyResult(BaseModel):
+    applied: bool
+    files: list[PatchFileChange] = Field(default_factory=list)
+    summary: str = ""
+    errors: list[str] = Field(default_factory=list)
+
+
 class GeneratedPatch(BaseModel):
     generated: bool
     patch_text: str = ""
@@ -104,5 +111,6 @@ class CodingTaskResult(BaseModel):
     context_package: ContextPackage
     generated_patch: GeneratedPatch | None = None
     patch_preview: PatchPreview | None = None
+    apply_result: PatchApplyResult | None = None
     sandbox_result: SandboxResult | None = None
     final_summary: str
