@@ -1,0 +1,25 @@
+# Python cache and test output
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Local downloads and large installers
+downloads/
+*.exe
+*.msi
+
+# Local editor/system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Alternate local git metadata used when `.git` is not writable in sandbox
+.gitrepo/
