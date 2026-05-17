@@ -21,6 +21,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 12 | complete | Add LLM-based Patch Generator with rule fallback |
 | 13 | complete | Repair simplified LLM diffs into valid git-style patches |
 | 14 | complete | Add explicit verified patch apply flow |
+| 15 | complete | Add real task mode, git safety, and PR/review artifacts |
 
 ## Key Decisions
 
@@ -37,6 +38,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - LLM patch generation should use an OpenAI-compatible Chat Completions API and keep the rule generator as fallback.
 - LLM patch output should be normalized against real repository file content before validation, because models may return simplified unified diffs or stale hunk line numbers.
 - Applying a patch to the real repository must be explicit. The default loop keeps writes inside a sandbox copy.
+- Real repository apply/commit mode should guard dirty git worktrees, create a task branch by default, save artifacts, and generate local PR summary/test report files before commit.
 
 ## Errors Encountered
 

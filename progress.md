@@ -58,3 +58,6 @@
 - Added explicit verified patch apply flow: `PatchApplyResult`, `apply_patch_to_repo`, CLI `--apply`, Hermes `ai_coding_apply_patch`, and `apply` support on `ai_coding_run_minimum_loop`.
 - Fixed Windows/nested-repo `git apply` behavior by setting `GIT_CEILING_DIRECTORIES` and writing temporary diff files with LF newlines.
 - Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 27 tests.
+- Added real task mode with `run_coding_task_loop` and Hermes `ai_coding_run_task_loop`.
+- Added git safety: clean-worktree guard, default branch creation, patch artifacts, optional commit, rollback on commit failure, PR summary, and test report artifacts.
+- Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 30 tests.

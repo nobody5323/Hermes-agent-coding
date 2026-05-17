@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .workflow import run_minimum_bugfix_loop
+from .workflow import run_coding_task_loop
 
 
 def _read_patch(path: str | None) -> str | None:
@@ -19,7 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m extensions.ai_coding.cli")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    run_parser = subparsers.add_parser("run", help="Run the minimum AI Coding bug-fix loop")
+    run_parser = subparsers.add_parser("run", help="Run the AI Coding task loop")
     run_parser.add_argument("--repo", required=True, help="Target repository path")
     run_parser.add_argument("--task", required=True, help="User coding task")
     run_parser.add_argument("--patch", help="Unified diff patch file to preview and verify")
@@ -45,24 +45,67 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument(
         "--apply",
         action="store_true",
-        help="Apply the validated patch to the real repository after sandbox verification passes",
+        help="Apply the validated patch to the real repository after sandbox verification passes.",
     )
+    run_parser.add_argument(
+        "--allow-dirty",
+        action="store_true",
+        help="Allow applying inside a dirty git worktree.",
+    )
+    run_parser.add_argument(
+        "--no-branch",
+        action="store_false",
+        dest="create_branch",
+        default=True,
+        help="Do not create an ai-coding branch before applying in a git repository.",
+    )
+    run_parser.add_argument("--branch-name", help="Branch name to create before applying")
+    run_parser.add_argument("--artifact-dir", help="Directory for patch, PR summary, and test report artifacts")
+    run_parser.add_argument(
+        "--no-artifacts",
+        action="store_false",
+        dest="save_artifacts",
+        default=True,
+        help="Do not save the patch artifact during apply.",
+    )
+    run_parser.add_argument(
+        "--no-review",
+        action="store_false",
+        dest="write_review",
+        default=True,
+        help="Do not write PR summary and test report artifacts during apply.",
+    )
+    run_parser.add_argument(
+        "--commit",
+        action="store_true",
+        help="Commit the applied patch and generated review artifacts.",
+    )
+    run_parser.add_argument("--commit-message", help="Commit message to use with --commit")
     return parser
 
 
 def run_command(args: argparse.Namespace) -> int:
     patch_text = _read_patch(args.patch)
+    apply_to_repo = args.apply or args.commit
     if args.patch is None and not args.auto_patch:
-        print("No --patch provided. Pass --auto-patch to use the MVP rule-based patch generator.", file=sys.stderr)
+        print("No --patch provided. Pass --auto-patch to use the configured patch generator.", file=sys.stderr)
         return 2
-    result = run_minimum_bugfix_loop(
+    result = run_coding_task_loop(
         args.repo,
         args.task,
         patch_text=patch_text,
         project_id=args.project_id,
         sandbox_backend=args.sandbox,
         patch_generator=args.patch_generator,
-        apply_to_repo=args.apply,
+        apply_to_repo=apply_to_repo,
+        create_branch=args.create_branch,
+        branch_name=args.branch_name,
+        allow_dirty=args.allow_dirty,
+        save_artifacts=args.save_artifacts,
+        artifact_dir=args.artifact_dir,
+        commit=args.commit,
+        commit_message=args.commit_message,
+        write_review=args.write_review,
     )
 
     if args.json:

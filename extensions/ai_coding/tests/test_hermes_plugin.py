@@ -40,6 +40,7 @@ def test_hermes_plugin_registers_tools_and_skill():
     assert "ai_coding_scan_repository" in ctx.tools
     assert "ai_coding_apply_patch" in ctx.tools
     assert "ai_coding_run_minimum_loop" in ctx.tools
+    assert "ai_coding_run_task_loop" in ctx.tools
     assert all(tool["toolset"] == "ai_coding" for tool in ctx.tools.values())
     assert "ai-coding" in ctx.skills
 

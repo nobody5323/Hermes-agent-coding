@@ -12,7 +12,7 @@ from extensions.ai_coding.schemas import CodingTask
 from extensions.ai_coding.tools.patch import apply_patch_to_repo, preview_patch, validate_patch_against_repo
 from extensions.ai_coding.tools.repository import read_file_slice, scan_repository, search_code
 from extensions.ai_coding.tools.sandbox import run_pytest_docker_sandbox, run_pytest_sandbox
-from extensions.ai_coding.workflow import run_minimum_bugfix_loop
+from extensions.ai_coding.workflow import run_coding_task_loop
 
 
 TOOLSET = "ai_coding"
@@ -60,6 +60,50 @@ def _schema(
             "required": required,
         },
     }
+
+
+def _run_task_loop(params: dict[str, Any]) -> Any:
+    return run_coding_task_loop(
+        params["repo_path"],
+        params["task"],
+        patch_text=params.get("patch_text"),
+        project_id=params.get("project_id", "demo"),
+        sandbox_backend=params.get("sandbox", "local"),
+        patch_generator=params.get("patch_generator", "auto"),
+        apply_to_repo=params.get("apply", False) or params.get("commit", False),
+        create_branch=params.get("create_branch", True),
+        branch_name=params.get("branch_name"),
+        allow_dirty=params.get("allow_dirty", False),
+        save_artifacts=params.get("save_artifacts", True),
+        artifact_dir=params.get("artifact_dir"),
+        commit=params.get("commit", False),
+        commit_message=params.get("commit_message"),
+        write_review=params.get("write_review", True),
+    )
+
+
+LOOP_SCHEMA = _schema(
+    "ai_coding_run_task_loop",
+    "Run the AI Coding task loop on any repository.",
+    {
+        "repo_path": {"type": "string"},
+        "task": {"type": "string"},
+        "patch_text": {"type": "string"},
+        "project_id": {"type": "string", "default": "demo"},
+        "sandbox": {"type": "string", "enum": ["local", "docker"], "default": "local"},
+        "patch_generator": {"type": "string", "enum": ["auto", "llm", "rule"], "default": "auto"},
+        "apply": {"type": "boolean", "default": False},
+        "create_branch": {"type": "boolean", "default": True},
+        "branch_name": {"type": "string"},
+        "allow_dirty": {"type": "boolean", "default": False},
+        "save_artifacts": {"type": "boolean", "default": True},
+        "artifact_dir": {"type": "string"},
+        "commit": {"type": "boolean", "default": False},
+        "commit_message": {"type": "string"},
+        "write_review": {"type": "boolean", "default": True},
+    },
+    ["repo_path", "task"],
+)
 
 
 TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = [
@@ -237,29 +281,14 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
     (
         "ai_coding_run_minimum_loop",
         "Run the full MVP bug-fix loop.",
-        _schema(
-            "ai_coding_run_minimum_loop",
-            "Run the full MVP bug-fix loop.",
-            {
-                "repo_path": {"type": "string"},
-                "task": {"type": "string"},
-                "patch_text": {"type": "string"},
-                "project_id": {"type": "string", "default": "demo"},
-                "sandbox": {"type": "string", "enum": ["local", "docker"], "default": "local"},
-                "patch_generator": {"type": "string", "enum": ["auto", "llm", "rule"], "default": "auto"},
-                "apply": {"type": "boolean", "default": False},
-            },
-            ["repo_path", "task"],
-        ),
-        lambda params: run_minimum_bugfix_loop(
-            params["repo_path"],
-            params["task"],
-            patch_text=params.get("patch_text"),
-            project_id=params.get("project_id", "demo"),
-            sandbox_backend=params.get("sandbox", "local"),
-            patch_generator=params.get("patch_generator", "auto"),
-            apply_to_repo=params.get("apply", False),
-        ),
+        LOOP_SCHEMA | {"name": "ai_coding_run_minimum_loop", "description": "Run the full MVP bug-fix loop."},
+        _run_task_loop,
+    ),
+    (
+        "ai_coding_run_task_loop",
+        "Run the AI Coding task loop on any repository.",
+        LOOP_SCHEMA,
+        _run_task_loop,
     ),
 ]
 

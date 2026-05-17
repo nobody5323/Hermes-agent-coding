@@ -73,6 +73,30 @@ python -m extensions.ai_coding.cli run \
   --apply
 ```
 
+For real repositories, use the same `run` command with an absolute repo path and `--patch-generator llm`. When `--apply` or `--commit` targets a git repository, the flow checks for a clean worktree first and creates an `ai-coding/<task-id>` branch by default.
+
+```bash
+python -m extensions.ai_coding.cli run \
+  --repo /path/to/your/repo \
+  --task "fix the failing login validation test" \
+  --auto-patch \
+  --patch-generator llm
+```
+
+Commit and review artifact mode:
+
+```bash
+python -m extensions.ai_coding.cli run \
+  --repo /path/to/your/repo \
+  --task "fix the failing login validation test" \
+  --auto-patch \
+  --patch-generator llm \
+  --commit \
+  --commit-message "Fix login validation"
+```
+
+This writes `.ai-coding/runs/<task-id>/change.diff`, `test_report.md`, and `pr_summary.md`, then commits the code changes and review artifacts. Use `--allow-dirty` only when you deliberately want to work on an already dirty git worktree.
+
 Supported generator modes:
 
 ```text
@@ -126,6 +150,7 @@ ai_coding_apply_patch
 ai_coding_run_pytest_sandbox
 ai_coding_run_pytest_docker_sandbox
 ai_coding_run_minimum_loop
+ai_coding_run_task_loop
 ```
 
 运行 Hermes 前设置：

@@ -82,6 +82,16 @@ class PatchApplyResult(BaseModel):
     files: list[PatchFileChange] = Field(default_factory=list)
     summary: str = ""
     errors: list[str] = Field(default_factory=list)
+    git_repo: bool = False
+    original_branch: str | None = None
+    branch_name: str | None = None
+    branch_created: bool = False
+    patch_artifact_path: str | None = None
+    test_report_path: str | None = None
+    pr_summary_path: str | None = None
+    commit_sha: str | None = None
+    dirty_files: list[str] = Field(default_factory=list)
+    rolled_back: bool = False
 
 
 class GeneratedPatch(BaseModel):

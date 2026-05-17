@@ -1,4 +1,4 @@
-"""A small orchestration function for the minimum bug-fix loop."""
+"""Small orchestration functions for AI Coding task loops."""
 
 from __future__ import annotations
 
@@ -29,6 +29,14 @@ def run_minimum_bugfix_loop(
     sandbox_backend: str = "local",
     patch_generator: str = "auto",
     apply_to_repo: bool = False,
+    create_branch: bool = False,
+    branch_name: str | None = None,
+    allow_dirty: bool = False,
+    save_artifacts: bool = False,
+    artifact_dir: str | Path | None = None,
+    commit: bool = False,
+    commit_message: str | None = None,
+    write_review: bool = False,
 ) -> CodingTaskResult:
     task = CodingTask(
         task_id=_task_id(user_request, repo_path),
@@ -56,7 +64,21 @@ def run_minimum_bugfix_loop(
     apply_result = None
     if apply_to_repo:
         if patch_preview and patch_preview.valid and sandbox_result and sandbox_result.exit_code == 0 and patch_text:
-            apply_result = apply_patch_to_repo(repo_path, patch_text)
+            apply_result = apply_patch_to_repo(
+                repo_path,
+                patch_text,
+                task_id=task.task_id,
+                task=user_request,
+                create_branch=create_branch,
+                branch_name=branch_name,
+                allow_dirty=allow_dirty,
+                save_artifacts=save_artifacts,
+                artifact_dir=artifact_dir,
+                sandbox_result=sandbox_result,
+                commit=commit,
+                commit_message=commit_message,
+                write_review=write_review,
+            )
         else:
             apply_result = PatchApplyResult(
                 applied=False,
@@ -77,6 +99,14 @@ def run_minimum_bugfix_loop(
         final_parts.append(f"Sandbox: exit={sandbox_result.exit_code}, {sandbox_result.summary}")
     if apply_result:
         final_parts.append(f"Apply: applied={apply_result.applied}, {apply_result.summary}")
+        if apply_result.branch_name:
+            final_parts.append(f"Branch: {apply_result.branch_name}, created={apply_result.branch_created}")
+        if apply_result.commit_sha:
+            final_parts.append(f"Commit: {apply_result.commit_sha}")
+        if apply_result.pr_summary_path:
+            final_parts.append(f"PR summary: {apply_result.pr_summary_path}")
+        if apply_result.test_report_path:
+            final_parts.append(f"Test report: {apply_result.test_report_path}")
 
     return CodingTaskResult(
         task=task,
@@ -87,3 +117,17 @@ def run_minimum_bugfix_loop(
         sandbox_result=sandbox_result,
         final_summary="\n".join(final_parts),
     )
+
+
+def run_coding_task_loop(
+    repo_path: str | Path,
+    user_request: str,
+    **kwargs,
+) -> CodingTaskResult:
+    """Run the general task loop.
+
+    This keeps the original bugfix loop API intact while making the entrypoint
+    naming less demo-specific for real repositories.
+    """
+
+    return run_minimum_bugfix_loop(repo_path, user_request, **kwargs)

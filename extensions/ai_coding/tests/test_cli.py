@@ -1,4 +1,5 @@
 import shutil
+import subprocess
 import tempfile
 from contextlib import contextmanager
 from pathlib import Path
@@ -18,6 +19,17 @@ def workspace_temp_repo():
     with tempfile.TemporaryDirectory(prefix="cli-", dir=temp_root) as temp_dir:
         repo = Path(temp_dir) / "repo"
         shutil.copytree(FIXTURE_PATH, repo, ignore=shutil.ignore_patterns("__pycache__"))
+        yield repo
+
+
+@contextmanager
+def workspace_temp_git_repo():
+    with workspace_temp_repo() as repo:
+        subprocess.run(["git", "init"], cwd=repo, check=True, text=True, capture_output=True)
+        subprocess.run(["git", "config", "user.email", "ai-coding@example.test"], cwd=repo, check=True)
+        subprocess.run(["git", "config", "user.name", "AI Coding Test"], cwd=repo, check=True)
+        subprocess.run(["git", "add", "."], cwd=repo, check=True, text=True, capture_output=True)
+        subprocess.run(["git", "commit", "-m", "initial"], cwd=repo, check=True, text=True, capture_output=True)
         yield repo
 
 
@@ -131,3 +143,30 @@ def test_cli_apply_modifies_repo_after_sandbox_passes(capsys):
         assert exit_code == 0
         assert "Apply: applied=True" in output
         assert "return False" in (repo / "src" / "user_service.py").read_text(encoding="utf-8")
+
+
+def test_cli_commit_writes_review_artifacts_and_commit(capsys):
+    with workspace_temp_git_repo() as repo:
+        exit_code = main(
+            [
+                "run",
+                "--repo",
+                str(repo),
+                "--task",
+                "fix empty password login bug",
+                "--patch",
+                PATCH_FILE,
+                "--commit",
+                "--branch-name",
+                "ai-coding/cli-commit",
+                "--commit-message",
+                "Fix empty password login",
+            ]
+        )
+        output = capsys.readouterr().out
+        assert exit_code == 0
+        assert "Branch: ai-coding/cli-commit, created=True" in output
+        assert "Commit:" in output
+        assert (repo / ".ai-coding" / "runs").exists()
+        status = subprocess.run(["git", "status", "--porcelain"], cwd=repo, text=True, capture_output=True, check=True)
+        assert status.stdout == ""

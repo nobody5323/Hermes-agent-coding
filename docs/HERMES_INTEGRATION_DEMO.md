@@ -150,6 +150,7 @@ ai_coding_apply_patch
 ai_coding_run_pytest_sandbox
 ai_coding_run_pytest_docker_sandbox
 ai_coding_run_minimum_loop
+ai_coding_run_task_loop
 ```
 
 If the scan unexpectedly includes a large `Python-3.9.0/` tree or other unrelated directories, move them outside `/opt/Hermes-agent-coding` and scan again.
@@ -225,6 +226,8 @@ The LLM Patch Generator sends line-numbered file context and normalizes returned
 
 By default the minimum loop does not modify the real repository. It applies the patch only inside the sandbox copy. To apply after validation and sandbox success, use `--apply` in the CLI or pass `apply=true` to `ai_coding_run_minimum_loop`.
 
+For real repositories, use `ai_coding_run_task_loop`. It supports arbitrary repo paths and tasks when the LLM patch generator is configured. In git repositories, `apply=true` checks for a clean worktree before writing and creates an `ai-coding/<task-id>` branch by default. `commit=true` writes patch, test report, and PR summary artifacts under `.ai-coding/runs/<task-id>/`, then creates a local commit.
+
 CLI:
 
 ```bash
@@ -258,6 +261,18 @@ Apply a verified patch to the real repository:
 hermes chat -q "Call ai_coding_run_minimum_loop with repo_path='/opt/Hermes-agent-coding/extensions/ai_coding/tests/fixtures/demo_python_repo', task='fix empty password login bug and return False', patch_generator='llm', apply=true. Do not provide patch_text."
 ```
 
+Run a real repository task in preview-only mode:
+
+```bash
+hermes chat -q "Call ai_coding_run_task_loop with repo_path='/path/to/your/repo', task='fix the failing login validation test', patch_generator='llm'. Do not apply."
+```
+
+Run with branch, apply, commit, PR summary, and test report:
+
+```bash
+hermes chat -q "Call ai_coding_run_task_loop with repo_path='/path/to/your/repo', task='fix the failing login validation test', patch_generator='llm', apply=true, commit=true, commit_message='Fix login validation'."
+```
+
 Expected:
 
 ```text
@@ -265,7 +280,7 @@ Patch generator: generated=True
 Sandbox: exit=0, command succeeded
 ```
 
-This generator is intentionally narrow. It proves that the loop can generate and verify a patch, but it does not claim to be a general-purpose code generator yet.
+The deterministic rule generator is intentionally narrow and only exists for the demo bug. Real repository tasks should use `patch_generator=llm`.
 
 To require LLM generation rather than fallback:
 
