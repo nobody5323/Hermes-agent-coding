@@ -67,3 +67,5 @@
 - Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 33 tests.
 - Added configurable Qdrant, OpenAI-compatible embeddings, and generic reranker services with local retrieval fallback.
 - Added `.env.example` and RAG service tests with mocked service adapters.
+- Completed final acceptance run: `python -m pytest extensions/ai_coding/tests` passed with 35 tests.
+- Added `docs/ACCEPTANCE_REPORT.md` with accepted scope, verification evidence, configuration, safety guarantees, boundaries, and final decision.

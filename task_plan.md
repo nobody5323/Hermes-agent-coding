@@ -24,6 +24,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 15 | complete | Add real task mode, git safety, and PR/review artifacts |
 | 16 | complete | Add enhanced Context/RAG, repair loop, and Memory/Lessons |
 | 17 | complete | Add configurable Qdrant, embedding, and reranker services |
+| 18 | complete | Complete final acceptance and write acceptance report |
 
 ## Key Decisions
 
