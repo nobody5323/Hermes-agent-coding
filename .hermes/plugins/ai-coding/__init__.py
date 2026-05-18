@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from extensions.ai_coding.context_engineering import build_context_package
+from extensions.ai_coding.memory import load_lessons, retrieve_lessons, write_lesson
 from extensions.ai_coding.rag.retriever import retrieve_code_context
 from extensions.ai_coding.schemas import CodingTask
 from extensions.ai_coding.tools.patch import apply_patch_to_repo, preview_patch, validate_patch_against_repo
@@ -79,6 +80,9 @@ def _run_task_loop(params: dict[str, Any]) -> Any:
         commit=params.get("commit", False),
         commit_message=params.get("commit_message"),
         write_review=params.get("write_review", True),
+        max_repair_attempts=params.get("repair_attempts", 0),
+        use_memory=params.get("use_memory", True),
+        write_memory=params.get("write_memory", False),
     )
 
 
@@ -101,6 +105,9 @@ LOOP_SCHEMA = _schema(
         "commit": {"type": "boolean", "default": False},
         "commit_message": {"type": "string"},
         "write_review": {"type": "boolean", "default": True},
+        "repair_attempts": {"type": "integer", "default": 0},
+        "use_memory": {"type": "boolean", "default": True},
+        "write_memory": {"type": "boolean", "default": False},
     },
     ["repo_path", "task"],
 )
@@ -211,8 +218,44 @@ TOOLS: list[tuple[str, str, dict[str, Any], Callable[[dict[str, Any]], Any]]] = 
                 params["task"],
                 project_id=params.get("project_id", "demo"),
                 top_k=params.get("top_k", 5),
+                lessons=[lesson.summary for lesson in retrieve_lessons(params["repo_path"], params["task"])],
             ),
             token_budget=params.get("token_budget"),
+            lessons=retrieve_lessons(params["repo_path"], params["task"]),
+        ),
+    ),
+    (
+        "ai_coding_read_lessons",
+        "Read repository-local AI Coding lessons.",
+        _schema(
+            "ai_coding_read_lessons",
+            "Read repository-local AI Coding lessons.",
+            {"repo_path": {"type": "string"}, "query": {"type": "string"}, "top_k": {"type": "integer", "default": 3}},
+            ["repo_path"],
+        ),
+        lambda params: retrieve_lessons(params["repo_path"], params["query"], top_k=params.get("top_k", 3))
+        if params.get("query")
+        else load_lessons(params["repo_path"]),
+    ),
+    (
+        "ai_coding_write_lesson",
+        "Write a repository-local AI Coding lesson.",
+        _schema(
+            "ai_coding_write_lesson",
+            "Write a repository-local AI Coding lesson.",
+            {
+                "repo_path": {"type": "string"},
+                "task": {"type": "string"},
+                "summary": {"type": "string"},
+                "outcome": {"type": "string", "default": "success"},
+            },
+            ["repo_path", "task", "summary"],
+        ),
+        lambda params: write_lesson(
+            params["repo_path"],
+            task=params["task"],
+            summary=params["summary"],
+            outcome=params.get("outcome", "success"),
         ),
     ),
     (

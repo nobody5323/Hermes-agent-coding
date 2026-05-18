@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from .config import get_config
-from .schemas import CodingTask, ContextPackage, RepositorySummary, RetrievedChunk
+from .schemas import CodingTask, ContextPackage, MemoryLesson, RepositorySummary, RetrievedChunk
 
 
 def estimate_tokens(text: str) -> int:
@@ -16,8 +16,10 @@ def build_context_package(
     retrieved_chunks: list[RetrievedChunk],
     *,
     token_budget: int | None = None,
+    lessons: list[MemoryLesson] | None = None,
 ) -> ContextPackage:
     token_budget = token_budget or get_config().default_token_budget
+    lessons = lessons or []
     ordered = sorted(retrieved_chunks, key=lambda item: item.score, reverse=True)
     selected: list[RetrievedChunk] = []
     used_ranges: set[tuple[str, int, int]] = set()
@@ -34,8 +36,20 @@ def build_context_package(
         f"- Dependency files: {repository.dependency_files}",
         f"- Test commands: {repository.test_commands}",
         "",
-        "## Relevant Chunks",
+        "## Relevant Lessons",
     ]
+    if lessons:
+        for lesson in lessons:
+            files = ", ".join(lesson.files) if lesson.files else "unknown files"
+            header.append(f"- {lesson.summary} (task: {lesson.task}; files: {files})")
+    else:
+        header.append("- None")
+    header.extend(
+        [
+            "",
+            "## Relevant Chunks",
+        ]
+    )
     markdown_parts = ["\n".join(header)]
     current_tokens = estimate_tokens(markdown_parts[0])
 
@@ -70,4 +84,5 @@ def build_context_package(
         token_budget=token_budget,
         token_estimate=estimate_tokens(markdown),
         markdown=markdown,
+        lessons=lessons,
     )

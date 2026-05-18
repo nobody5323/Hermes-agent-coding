@@ -52,6 +52,14 @@ class RetrievedChunk(BaseModel):
     reasons: list[str] = Field(default_factory=list)
 
 
+class MemoryLesson(BaseModel):
+    task: str
+    summary: str
+    files: list[str] = Field(default_factory=list)
+    outcome: str = "success"
+    created_at: str = ""
+
+
 class ContextPackage(BaseModel):
     task: CodingTask
     repository: RepositorySummary
@@ -59,6 +67,7 @@ class ContextPackage(BaseModel):
     token_budget: int
     token_estimate: int
     markdown: str
+    lessons: list[MemoryLesson] = Field(default_factory=list)
 
 
 class PatchFileChange(BaseModel):
@@ -116,6 +125,16 @@ class SandboxResult(BaseModel):
     rejected: bool = False
 
 
+class RepairIteration(BaseModel):
+    attempt: int
+    query: str
+    patch_generated: bool = False
+    patch_valid: bool = False
+    sandbox_exit_code: int | None = None
+    summary: str = ""
+    errors: list[str] = Field(default_factory=list)
+
+
 class CodingTaskResult(BaseModel):
     task: CodingTask
     context_package: ContextPackage
@@ -123,4 +142,7 @@ class CodingTaskResult(BaseModel):
     patch_preview: PatchPreview | None = None
     apply_result: PatchApplyResult | None = None
     sandbox_result: SandboxResult | None = None
+    repair_iterations: list[RepairIteration] = Field(default_factory=list)
+    memory_lessons: list[MemoryLesson] = Field(default_factory=list)
+    memory_written: bool = False
     final_summary: str

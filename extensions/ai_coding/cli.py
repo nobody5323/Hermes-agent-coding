@@ -81,6 +81,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="Commit the applied patch and generated review artifacts.",
     )
     run_parser.add_argument("--commit-message", help="Commit message to use with --commit")
+    run_parser.add_argument(
+        "--repair-attempts",
+        type=int,
+        default=0,
+        help="Number of extra generate/verify attempts after validation or sandbox failure.",
+    )
+    run_parser.add_argument(
+        "--no-memory",
+        action="store_false",
+        dest="use_memory",
+        default=True,
+        help="Do not include repository-local lessons in the context package.",
+    )
+    run_parser.add_argument(
+        "--write-memory",
+        action="store_true",
+        help="Write a repository-local lesson after a successful verified run.",
+    )
     return parser
 
 
@@ -106,6 +124,9 @@ def run_command(args: argparse.Namespace) -> int:
         commit=args.commit,
         commit_message=args.commit_message,
         write_review=args.write_review,
+        max_repair_attempts=args.repair_attempts,
+        use_memory=args.use_memory,
+        write_memory=args.write_memory,
     )
 
     if args.json:

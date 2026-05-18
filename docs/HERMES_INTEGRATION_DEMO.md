@@ -147,6 +147,8 @@ ai_coding_build_context_package
 ai_coding_preview_patch
 ai_coding_validate_patch
 ai_coding_apply_patch
+ai_coding_read_lessons
+ai_coding_write_lesson
 ai_coding_run_pytest_sandbox
 ai_coding_run_pytest_docker_sandbox
 ai_coding_run_minimum_loop
@@ -228,6 +230,12 @@ By default the minimum loop does not modify the real repository. It applies the 
 
 For real repositories, use `ai_coding_run_task_loop`. It supports arbitrary repo paths and tasks when the LLM patch generator is configured. In git repositories, `apply=true` checks for a clean worktree before writing and creates an `ai-coding/<task-id>` branch by default. `commit=true` writes patch, test report, and PR summary artifacts under `.ai-coding/runs/<task-id>/`, then creates a local commit.
 
+The remaining production modules are also available:
+
+- Enhanced Context/RAG: query expansion, failure-feedback retrieval, source/test sibling reranking, and lessons injected into the context package.
+- Multi-round repair loop: pass `repair_attempts=2` to retry generation with patch validation or sandbox failure feedback.
+- Memory/Lessons: existing `.ai-coding/memory/lessons.jsonl` entries are read by default; pass `write_memory=true` to record a successful verified run.
+
 CLI:
 
 ```bash
@@ -271,6 +279,12 @@ Run with branch, apply, commit, PR summary, and test report:
 
 ```bash
 hermes chat -q "Call ai_coding_run_task_loop with repo_path='/path/to/your/repo', task='fix the failing login validation test', patch_generator='llm', apply=true, commit=true, commit_message='Fix login validation'."
+```
+
+Run with repair and memory:
+
+```bash
+hermes chat -q "Call ai_coding_run_task_loop with repo_path='/path/to/your/repo', task='fix the failing login validation test', patch_generator='llm', repair_attempts=2, write_memory=true. Do not apply."
 ```
 
 Expected:

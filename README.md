@@ -97,6 +97,22 @@ python -m extensions.ai_coding.cli run \
 
 This writes `.ai-coding/runs/<task-id>/change.diff`, `test_report.md`, and `pr_summary.md`, then commits the code changes and review artifacts. Use `--allow-dirty` only when you deliberately want to work on an already dirty git worktree.
 
+Enhanced context, repair loop, and lessons:
+
+```bash
+python -m extensions.ai_coding.cli run \
+  --repo /path/to/your/repo \
+  --task "fix the failing login validation test" \
+  --auto-patch \
+  --patch-generator llm \
+  --repair-attempts 2 \
+  --write-memory
+```
+
+- Retrieval expands query terms, uses sandbox failure feedback on retry, and reranks source/test sibling files together.
+- `--repair-attempts N` allows up to N extra generate/validate/sandbox attempts after a bad patch or failed test.
+- Repository-local lessons live in `.ai-coding/memory/lessons.jsonl`. Existing lessons are read by default; use `--no-memory` to ignore them and `--write-memory` to record a successful run.
+
 Supported generator modes:
 
 ```text
@@ -147,6 +163,8 @@ ai_coding_build_context_package
 ai_coding_preview_patch
 ai_coding_validate_patch
 ai_coding_apply_patch
+ai_coding_read_lessons
+ai_coding_write_lesson
 ai_coding_run_pytest_sandbox
 ai_coding_run_pytest_docker_sandbox
 ai_coding_run_minimum_loop

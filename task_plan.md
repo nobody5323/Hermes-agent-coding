@@ -22,6 +22,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 13 | complete | Repair simplified LLM diffs into valid git-style patches |
 | 14 | complete | Add explicit verified patch apply flow |
 | 15 | complete | Add real task mode, git safety, and PR/review artifacts |
+| 16 | complete | Add enhanced Context/RAG, repair loop, and Memory/Lessons |
 
 ## Key Decisions
 
@@ -39,6 +40,9 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - LLM patch output should be normalized against real repository file content before validation, because models may return simplified unified diffs or stale hunk line numbers.
 - Applying a patch to the real repository must be explicit. The default loop keeps writes inside a sandbox copy.
 - Real repository apply/commit mode should guard dirty git worktrees, create a task branch by default, save artifacts, and generate local PR summary/test report files before commit.
+- Enhanced retrieval should stay local and dependency-free for now: query expansion, failure-feedback reranking, source/test sibling selection, and repository-local lessons before Qdrant/reranker integration.
+- Multi-round repair should be explicit and bounded with `repair_attempts`, not an unbounded agent loop.
+- Memory writes must be explicit with `write_memory` so preview runs do not dirty real repositories.
 
 ## Errors Encountered
 

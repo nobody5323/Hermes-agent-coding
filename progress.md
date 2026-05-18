@@ -61,3 +61,7 @@
 - Added real task mode with `run_coding_task_loop` and Hermes `ai_coding_run_task_loop`.
 - Added git safety: clean-worktree guard, default branch creation, patch artifacts, optional commit, rollback on commit failure, PR summary, and test report artifacts.
 - Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 30 tests.
+- Added enhanced Context/RAG with query expansion, failure feedback, sibling source/test reranking, and lesson injection.
+- Added bounded multi-round repair attempts after invalid patches or sandbox failures.
+- Added repository-local Memory/Lessons read/write helpers and Hermes lesson tools.
+- Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 33 tests.
