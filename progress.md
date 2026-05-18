@@ -65,3 +65,5 @@
 - Added bounded multi-round repair attempts after invalid patches or sandbox failures.
 - Added repository-local Memory/Lessons read/write helpers and Hermes lesson tools.
 - Verified full test suite: `python -m pytest extensions/ai_coding/tests` passed with 33 tests.
+- Added configurable Qdrant, OpenAI-compatible embeddings, and generic reranker services with local retrieval fallback.
+- Added `.env.example` and RAG service tests with mocked service adapters.

@@ -5,7 +5,7 @@
 当前版本先实现一个本地最小闭环：
 
 ```text
-代码任务 -> 仓库扫描 -> Python AST 分块 -> 关键词 + mock embedding 检索
+代码任务 -> 仓库扫描 -> Python AST 分块 -> 本地检索或可选 Qdrant/Embedding/Reranker
 -> Context Package -> Patch Preview -> 沙箱验证 pytest -> 结构化结果
 ```
 
@@ -15,7 +15,7 @@
 skills/ai-coding/              # Hermes Skill 文档和 prompt 模板
 extensions/ai_coding/          # 本地 MVP Python 包
 extensions/ai_coding/tools/    # repository/search/patch/sandbox 工具函数
-extensions/ai_coding/rag/      # chunker/mock embedding/retriever
+extensions/ai_coding/rag/      # chunker/local retriever/optional Qdrant services
 extensions/ai_coding/sandbox/  # 本地复制仓库 runner + Docker CLI runner
 extensions/ai_coding/tests/    # demo 仓库和 smoke tests
 ```
@@ -113,6 +113,35 @@ python -m extensions.ai_coding.cli run \
 - `--repair-attempts N` allows up to N extra generate/validate/sandbox attempts after a bad patch or failed test.
 - Repository-local lessons live in `.ai-coding/memory/lessons.jsonl`. Existing lessons are read by default; use `--no-memory` to ignore them and `--write-memory` to record a successful run.
 
+## Optional Qdrant / Embedding / Reranker
+
+默认不需要任何外部 RAG 服务；未配置时继续使用本地 mock embedding + 规则 rerank。用户可以用环境变量切到真实服务：
+
+```bash
+export AI_CODING_RAG_BACKEND=qdrant        # local | qdrant | auto
+export AI_CODING_QDRANT_URL="http://localhost:6333"
+export AI_CODING_QDRANT_API_KEY=""         # Qdrant Cloud 时填写
+export AI_CODING_QDRANT_COLLECTION="ai_coding_chunks"
+export AI_CODING_EMBEDDING_BASE_URL="https://api.openai.com/v1"
+export AI_CODING_EMBEDDING_API_KEY="your-embedding-key"
+export AI_CODING_EMBEDDING_MODEL="text-embedding-3-small"
+export AI_CODING_EMBEDDING_DIMENSIONS=1536
+```
+
+可选 reranker，使用 Jina/Cohere 风格的 JSON rerank endpoint：
+
+```bash
+export AI_CODING_RERANKER_URL="https://api.jina.ai/v1/rerank"
+export AI_CODING_RERANKER_API_KEY="your-reranker-key"
+export AI_CODING_RERANKER_MODEL="jina-reranker-v2-base-multilingual"
+```
+
+`AI_CODING_RAG_BACKEND=auto` 会尝试 Qdrant，失败或配置不完整时自动回退本地检索。`qdrant` 模式也会在服务异常时回退，保证 agent 主链路不中断。默认每次检索会把当前 repo chunks upsert 到 Qdrant；如果你想提前离线建库，可设置：
+
+```bash
+export AI_CODING_QDRANT_INDEX_ON_RETRIEVE=false
+```
+
 Supported generator modes:
 
 ```text
@@ -191,7 +220,7 @@ docs/HERMES_INTEGRATION_DEMO.md
 
 ## 当前边界
 
-- 暂未接入 Qdrant / 完整 Reranker。
+- 已提供可配置 Qdrant / OpenAI-compatible embedding / generic reranker 适配层；默认仍为本地零依赖检索。
 - 已接入 OpenAI-compatible LLM Patch Generator；未配置 API key 时 `auto` 模式会回退到规则型 demo generator。
 - 已提供 Hermes Plugin 骨架，并已在真实 Hermes Agent + DeepSeek 环境里完成端到端调用验证。
 - Docker Desktop 需要在测试机器上单独安装并启动。

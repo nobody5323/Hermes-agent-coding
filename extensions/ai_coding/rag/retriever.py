@@ -9,6 +9,7 @@ from ..schemas import CodeChunk, RetrievedChunk
 from ..tools.repository import scan_repository
 from .chunker import chunk_file
 from .embeddings import MockEmbedding, cosine_similarity, tokenize
+from .services import OpenAIEmbeddingClient, QdrantVectorStore, RagServiceError, RerankerClient
 
 
 QUERY_SYNONYMS = {
@@ -51,9 +52,61 @@ def retrieve_code_context(
     feedback: str = "",
     lessons: list[str] | None = None,
 ) -> list[RetrievedChunk]:
-    top_k = top_k or get_config().default_top_k
+    config = get_config()
+    top_k = top_k or config.default_top_k
     chunks = index_repository_chunks(repo_path, project_id=project_id)
     expanded_query = expand_query(query, feedback=feedback, lessons=lessons)
+    remote = _retrieve_qdrant_context(config, chunks, expanded_query, top_k=top_k)
+    if remote:
+        reranked = _rerank_if_configured(config, expanded_query, remote, top_k=top_k)
+        return reranked[:top_k]
+    return _retrieve_local_context(chunks, expanded_query, top_k=top_k, feedback=feedback)
+
+
+def _retrieve_qdrant_context(
+    config,
+    chunks: list[CodeChunk],
+    expanded_query: str,
+    *,
+    top_k: int,
+) -> list[RetrievedChunk]:
+    if config.rag_backend not in {"qdrant", "auto"}:
+        return []
+    embedder = OpenAIEmbeddingClient.from_config(config)
+    store = QdrantVectorStore.from_config(config)
+    if embedder is None or store is None:
+        return []
+    try:
+        if config.qdrant_index_on_retrieve:
+            store.ensure_collection()
+            store.upsert_chunks(chunks, embedder.embed_texts([_chunk_embedding_text(chunk) for chunk in chunks]))
+        query_vector = embedder.embed_texts([expanded_query])[0]
+        return store.search(query_vector, limit=max(top_k * 2, top_k))
+    except (RagServiceError, IndexError):
+        return []
+
+
+def _rerank_if_configured(config, query: str, chunks: list[RetrievedChunk], *, top_k: int) -> list[RetrievedChunk]:
+    reranker = RerankerClient.from_config(config)
+    if reranker is None:
+        return chunks[:top_k]
+    try:
+        return reranker.rerank(query, chunks, top_k=top_k)
+    except RagServiceError:
+        return chunks[:top_k]
+
+
+def _chunk_embedding_text(chunk: CodeChunk) -> str:
+    return "\n".join([chunk.path, chunk.symbol_name or "", chunk.content])
+
+
+def _retrieve_local_context(
+    chunks: list[CodeChunk],
+    expanded_query: str,
+    *,
+    top_k: int,
+    feedback: str = "",
+) -> list[RetrievedChunk]:
     query_tokens = set(tokenize(expanded_query))
     embedder = MockEmbedding()
     query_vector = embedder.embed(expanded_query)

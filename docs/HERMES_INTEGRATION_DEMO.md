@@ -233,8 +233,29 @@ For real repositories, use `ai_coding_run_task_loop`. It supports arbitrary repo
 The remaining production modules are also available:
 
 - Enhanced Context/RAG: query expansion, failure-feedback retrieval, source/test sibling reranking, and lessons injected into the context package.
+- Optional production RAG services: configure Qdrant plus OpenAI-compatible embeddings and an optional reranker with environment variables.
 - Multi-round repair loop: pass `repair_attempts=2` to retry generation with patch validation or sandbox failure feedback.
 - Memory/Lessons: existing `.ai-coding/memory/lessons.jsonl` entries are read by default; pass `write_memory=true` to record a successful verified run.
+
+Qdrant / embedding / reranker configuration:
+
+```bash
+export AI_CODING_RAG_BACKEND=qdrant
+export AI_CODING_QDRANT_URL="http://localhost:6333"
+export AI_CODING_QDRANT_API_KEY=""
+export AI_CODING_QDRANT_COLLECTION="ai_coding_chunks"
+export AI_CODING_EMBEDDING_BASE_URL="https://api.openai.com/v1"
+export AI_CODING_EMBEDDING_API_KEY="your-embedding-key"
+export AI_CODING_EMBEDDING_MODEL="text-embedding-3-small"
+export AI_CODING_EMBEDDING_DIMENSIONS=1536
+
+# optional
+export AI_CODING_RERANKER_URL="https://api.jina.ai/v1/rerank"
+export AI_CODING_RERANKER_API_KEY="your-reranker-key"
+export AI_CODING_RERANKER_MODEL="jina-reranker-v2-base-multilingual"
+```
+
+Use `AI_CODING_RAG_BACKEND=auto` if you want Qdrant when available and local retrieval fallback otherwise.
 
 CLI:
 

@@ -23,6 +23,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 | 14 | complete | Add explicit verified patch apply flow |
 | 15 | complete | Add real task mode, git safety, and PR/review artifacts |
 | 16 | complete | Add enhanced Context/RAG, repair loop, and Memory/Lessons |
+| 17 | complete | Add configurable Qdrant, embedding, and reranker services |
 
 ## Key Decisions
 
@@ -43,6 +44,7 @@ Implement the smallest local AI Coding loop described in `module_implementation.
 - Enhanced retrieval should stay local and dependency-free for now: query expansion, failure-feedback reranking, source/test sibling selection, and repository-local lessons before Qdrant/reranker integration.
 - Multi-round repair should be explicit and bounded with `repair_attempts`, not an unbounded agent loop.
 - Memory writes must be explicit with `write_memory` so preview runs do not dirty real repositories.
+- Qdrant/embedding/reranker should be configured by users via environment variables and must fall back to local retrieval if unavailable.
 
 ## Errors Encountered
 
